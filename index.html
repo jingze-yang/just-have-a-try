@@ -94,17 +94,19 @@
       }
     }
 
-    #paper-map {
-      position: relative;
-      min-height: 280px;
-      border-radius: 0.9rem;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.06), transparent 55%),
-        radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.06), transparent 55%),
-        #020617;
-      border: 1px solid #1f2937;
-    }
+#paper-map {
+  position: relative;
+  /* 让画布更大一些 */
+  min-height: 600px;      /* 原来是 280px，直接翻倍 */
+  height: 70vh;           /* 高度占浏览器视窗的 70% */
+  border-radius: 0.9rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.06), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.06), transparent 55%),
+    #020617;
+  border: 1px solid #1f2937;
+}
 
     .map-grid {
       position: absolute;
@@ -414,7 +416,7 @@
       title: "Johansson (2000) – Shape fluctuations and LPP / TASEP",
       year: 2000,
       x: 100,
-      y: 150,
+      y: 100,
       tags: ["LPP", "TASEP", "GUE", "KPZ"],
       summaryHtml: `
         <p>
