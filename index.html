@@ -82,23 +82,30 @@
     }
 
     /* ===== 论文画布区域 ===== */
-    .map-layout {
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    @media (max-width: 800px) {
-      .map-layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+.map-layout {
+  display: grid;
+  /* 让左边画布更宽、右侧说明略窄一点 */
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+
+  /* 整块区域统一高度，左右对齐 */
+  align-items: stretch;
+  min-height: 420px;
+  /* 根据屏幕自动调整高度，大约是第一版的两倍面积 */
+  height: clamp(420px, 70vh, 640px);
+}
+
+@media (max-width: 800px) {
+  .map-layout {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;          /* 小屏就上下排列，让它自然撑开 */
+    min-height: 0;
+  }
+}
 
 #paper-map {
   position: relative;
-  /* 让画布更大一些 */
-  min-height: 600px;      /* 原来是 280px，直接翻倍 */
-  height: 70vh;           /* 高度占浏览器视窗的 70% */
   border-radius: 0.9rem;
   overflow: hidden;
   background:
@@ -106,6 +113,9 @@
     radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.06), transparent 55%),
     #020617;
   border: 1px solid #1f2937;
+
+  /* 让画布高度自动撑满 map-layout 左侧这一列 */
+  height: 100%;
 }
 
     .map-grid {
@@ -173,15 +183,17 @@
     }
 
     /* ===== 论文详情 ===== */
-    #paper-detail {
-      border-radius: 0.9rem;
-      border: 1px solid #1f2937;
-      padding: 0.75rem 0.85rem 0.9rem;
-      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 55%);
-      font-size: 0.85rem;
-      max-height: 320px;
-      overflow: auto;
-    }
+#paper-detail {
+  border-radius: 0.9rem;
+  border: 1px solid #1f2937;
+  padding: 0.75rem 0.85rem 0.9rem;
+  background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 55%);
+  font-size: 0.85rem;
+
+  /* 跟左侧画布同高，对齐 */
+  height: 100%;
+  overflow: auto;
+}
     #paper-detail h3 {
       margin: 0 0 0.3rem;
       font-size: 0.95rem;
