@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>KPZ & Integrable Probability Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* ===== 基础风格 ===== */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* ===== 顶部栏 ===== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid #1f2937;
+      background: rgba(2, 6, 23, 0.95);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .title {
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .subtitle {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    /* ===== 页面布局 ===== */
+    main {
+      max-width: 1100px;
+      margin: 1rem auto 3rem;
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    section {
+      border-radius: 1rem;
+      padding: 1rem 1.25rem 1.5rem;
+      background: radial-gradient(circle at top left, #0f172a, #020617 60%);
+      border: 1px solid #1f2937;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #e5e7eb;
+    }
+    section h2 span.icon {
+      font-size: 1.1rem;
+    }
+    section p.section-desc {
+      margin-top: 0.15rem;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    /* ===== 论文画布区域 ===== */
+    .map-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    @media (max-width: 800px) {
+      .map-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    #paper-map {
+      position: relative;
+      min-height: 280px;
+      border-radius: 0.9rem;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.06), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.06), transparent 55%),
+        #020617;
+      border: 1px solid #1f2937;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+      background-size: 50px 50px;
+      opacity: 0.2;
+      pointer-events: none;
+    }
+
+    .paper-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      padding: 0.3rem 0.55rem;
+      font-size: 0.75rem;
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.25);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+    .paper-node:hover {
+      transform: translate(-50%, -50%) scale(1.04);
+      background: #022c22;
+      border-color: #4ade80;
+      box-shadow: 0 14px 30px rgba(34, 197, 94, 0.35);
+    }
+    .paper-node.active {
+      background: #16a34a;
+      border-color: #bbf7d0;
+      color: #022c22;
+      box-shadow: 0 16px 40px rgba(34, 197, 94, 0.6);
+    }
+    .node-tag {
+      font-size: 0.65rem;
+      opacity: 0.8;
+      margin-left: 0.4rem;
+    }
+
+    .map-legend {
+      position: absolute;
+      left: 0.75rem;
+      bottom: 0.75rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      gap: 0.75rem;
+    }
+    .legend-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      background: #4ade80;
+      display: inline-block;
+      margin-right: 0.25rem;
+    }
+
+    /* ===== 论文详情 ===== */
+    #paper-detail {
+      border-radius: 0.9rem;
+      border: 1px solid #1f2937;
+      padding: 0.75rem 0.85rem 0.9rem;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 55%);
+      font-size: 0.85rem;
+      max-height: 320px;
+      overflow: auto;
+    }
+    #paper-detail h3 {
+      margin: 0 0 0.3rem;
+      font-size: 0.95rem;
+    }
+    #paper-detail .paper-meta {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 0.4rem;
+    }
+    #paper-detail .paper-summary p {
+      margin: 0.3rem 0;
+    }
+    #paper-detail .tag-chip {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      font-size: 0.65rem;
+      margin-right: 0.25rem;
+      margin-top: 0.25rem;
+    }
+
+    /* ===== 模型区 ===== */
+    #models {
+      margin-top: 0.5rem;
+    }
+    .model-card {
+      border-radius: 0.75rem;
+      border: 1px solid #1f2937;
+      padding: 0.75rem 0.9rem 0.95rem;
+      background: #020617;
+      margin-top: 0.6rem;
+      font-size: 0.85rem;
+    }
+    .model-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+    }
+    .model-header h3 {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.12rem 0.45rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      border: 1px solid rgba(148, 163, 184, 0.8);
+      color: #9ca3af;
+      gap: 0.25rem;
+    }
+    .badge-dot {
+      width: 0.4rem;
+      height: 0.4rem;
+      border-radius: 999px;
+      background: #4ade80;
+    }
+
+    .btn {
+      font-size: 0.8rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      background: #16a34a;
+      color: #022c22;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.45);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      background: #22c55e;
+      box-shadow: 0 14px 32px rgba(34, 197, 94, 0.55);
+    }
+
+    #lpp-output {
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      max-height: 360px;
+      overflow: auto;
+    }
+    .lpp-info {
+      margin-bottom: 0.35rem;
+      color: #9ca3af;
+    }
+
+    table.lpp-grid {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.7rem;
+    }
+    table.lpp-grid td {
+      border: 1px solid #1f2937;
+      padding: 0.25rem 0.2rem;
+      text-align: center;
+      min-width: 1.6rem;
+    }
+    td.weight-cell {
+      background: rgba(15, 23, 42, 0.95);
+      color: #e5e7eb;
+    }
+    td.path-cell {
+      background: #22c55e;
+      color: #022c22;
+      font-weight: 600;
+    }
+    .lpp-legend {
+      font-size: 0.7rem;
+      margin-top: 0.35rem;
+      color: #9ca3af;
+    }
+
+    /* ===== 页脚 ===== */
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #6b7280;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="title">KPZ & Integrable Probability Map</div>
+    <div class="subtitle">Personal navigator for papers, structures, and toy models</div>
+  </div>
+  <div style="font-size:0.75rem;color:#9ca3af;">
+    Built with a single <code>index.html</code>
+  </div>
+</header>
+
+<main>
+  <!-- ===== 论文画布 & 详情 ===== -->
+  <section id="papers">
+    <h2>
+      <span class="icon">🧭</span>
+      Paper canvas
+    </h2>
+    <p class="section-desc">
+      Click a node on the canvas to open your own notes and see how each paper sits in the KPZ / integrable probability landscape.
+    </p>
+
+    <div class="map-layout">
+      <!-- 画布 -->
+      <div id="paper-map">
+        <div class="map-grid"></div>
+        <!-- 节点由 JS 注入 -->
+        <div class="map-legend">
+          <div><span class="legend-dot"></span>Papers</div>
+          <div>Position ≈ topic / era / method</div>
+        </div>
+      </div>
+
+      <!-- 详情 -->
+      <div id="paper-detail">
+        <!-- 内容由 JS 注入 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 模型区域 ===== -->
+  <section id="models">
+    <h2>
+      <span class="icon">🧪</span>
+      Toy models
+    </h2>
+    <p class="section-desc">
+      Tiny interactive experiments to keep the KPZ intuition grounded. You can add more models later.
+    </p>
+
+    <div class="model-card">
+      <div class="model-header">
+        <h3>Directed LPP on a small grid</h3>
+        <span class="badge">
+          <span class="badge-dot"></span>
+          (1,1) → (N,N), Exp(1) weights
+        </span>
+      </div>
+      <p>
+        We sample an <code>N×N</code> grid of i.i.d. weights (approximate Exp(1) by <code>-log(U)</code>), compute the last passage time
+        to <code>(N,N)</code> via dynamic programming, and highlight one maximizing up-right geodesic.
+      </p>
+      <button class="btn" onclick="runLPPSimulation()">
+        ▶ Run LPP simulation
+      </button>
+      <div id="lpp-output"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  KPZ / Integrable Probability Notebook · hosted on GitHub Pages
+</footer>
+
+<!-- ===== JavaScript 部分 ===== -->
+<script>
+  // ===== 1. 论文数据：在这里维护你的“宇宙星图” =====
+  // x, y 是画布上的位置（百分比），方便你手动“排版”论文之间的大致关系。
+  const papersData = [
+    {
+      id: "BDJ1999",
+      title: "Baik–Deift–Johansson (1999) – Longest increasing subsequence & GUE Tracy–Widom",
+      year: 1999,
+      x: 20,
+      y: 30,
+      tags: ["LIS", "GUE", "Tracy–Widom", "early KPZ"],
+      summaryHtml: `
+        <p>
+          One of the foundational works connecting combinatorics (longest increasing subsequences of random permutations)
+          with random matrix theory and the KPZ universality class.
+        </p>
+        <p>
+          Main message: after centering and scaling, the LIS length converges to the GUE Tracy–Widom distribution.
+          This is one of the earliest clean appearances of KPZ / TW in a discrete model.
+        </p>
+        <p>
+          <strong>Your note (placeholder):</strong> Here you can write your own comments: how BDJ fits into your KPZ
+          mental map, how it compares to later results in LPP / TASEP, etc.
+        </p>
+      `
+    },
+    {
+      id: "Johansson2000",
+      title: "Johansson (2000) – Shape fluctuations and LPP / TASEP",
+      year: 2000,
+      x: 55,
+      y: 35,
+      tags: ["LPP", "TASEP", "GUE", "KPZ"],
+      summaryHtml: `
+        <p>
+          Johansson's paper on last passage percolation with geometric / exponential weights, giving Tracy–Widom fluctuations and
+          identifying a KPZ-scaling regime for directed polymers / growth models.
+        </p>
+        <p>
+          <strong>Your note (placeholder):</strong> Add your understanding of LPP↔TASEP mapping here and how this paper
+          sets up the framework you are now extending in your own work.
+        </p>
+      `
+    },
+    {
+      id: "Corwin2012",
+      title: "Corwin (2012) – The KPZ universality class overview",
+      year: 2012,
+      x: 80,
+      y: 25,
+      tags: ["survey", "KPZ", "integrable probability"],
+      summaryHtml: `
+        <p>
+          A broad survey of the KPZ universality class from the integrable probability viewpoint. Great as a global map.
+        </p>
+        <p>
+          <strong>Your note (placeholder):</strong> Summarize which parts are most relevant for your current projects
+          (KPZ fixed point, directed polymers, LPP, TASEP, etc.).
+        </p>
+      `
+    },
+    {
+      id: "YourPaper1",
+      title: "Your project – Joint distribution of first / last passage times",
+      year: 2025,
+      x: 65,
+      y: 70,
+      tags: ["your work", "geodesics", "joint distribution"],
+      summaryHtml: `
+        <p>
+          This is a placeholder for <strong>your own paper / thesis</strong>.
+        </p>
+        <p>
+          Use this space to write a concise abstract in your own words: what is the model, what is the main theorem,
+          which classical integrable tools are used, and how it connects to earlier works on LPP / TASEP / KPZ.
+        </p>
+        <p>
+          You can even link to an arXiv / PDF:
+          <br>
+          <a href="#" target="_blank" rel="noopener">[Add arXiv link here]</a>
+        </p>
+      `
+    }
+  ];
+
+  // ===== 2. 渲染画布上的节点 =====
+  function renderPaperMap() {
+    const mapEl = document.getElementById("paper-map");
+    // 删除旧节点（避免重复渲染）
+    const oldNodes = mapEl.querySelectorAll(".paper-node");
+    oldNodes.forEach(n => n.remove());
+
+    papersData.forEach(paper => {
+      const node = document.createElement("button");
+      node.className = "paper-node";
+      node.style.left = paper.x + "%";
+      node.style.top = paper.y + "%";
+      node.dataset.paperId = paper.id;
+
+      node.innerHTML = `
+        <span>${paper.title.split("–")[0].trim()}</span>
+        ${paper.tags && paper.tags.length
+          ? `<span class="node-tag">${paper.tags[0]}</span>`
+          : ""
+        }
+      `;
+
+      node.addEventListener("click", () => selectPaper(paper.id));
+      mapEl.appendChild(node);
+    });
+  }
+
+  // ===== 3. 展示论文详情 =====
+  function selectPaper(paperId) {
+    const paper = papersData.find(p => p.id === paperId);
+    if (!paper) return;
+
+    // 节点高亮
+    const allNodes = document.querySelectorAll(".paper-node");
+    allNodes.forEach(node => {
+      node.classList.toggle("active", node.dataset.paperId === paperId);
+    });
+
+    const detailEl = document.getElementById("paper-detail");
+    detailEl.innerHTML = `
+      <h3>${paper.title}</h3>
+      <div class="paper-meta">
+        <span>Year: ${paper.year}</span>
+      </div>
+      <div>
+        ${(paper.tags || []).map(tag => `<span class="tag-chip">${tag}</span>`).join("")}
+      </div>
+      <div class="paper-summary">
+        ${paper.summaryHtml}
+      </div>
+    `;
+  }
+
+  // ===== 4. LPP 模拟 =====
+  function runLPPSimulation() {
+    const N = 10; // grid size
+    const weights = [];
+    const dp = [];
+
+    // 生成权重 & DP
+    for (let i = 0; i < N; i++) {
+      weights[i] = [];
+      dp[i] = [];
+      for (let j = 0; j < N; j++) {
+        // approximate Exp(1): -log(U)
+        const u = Math.random();
+        const w = -Math.log(1 - u);
+        weights[i][j] = w;
+
+        const fromTop = i > 0 ? dp[i - 1][j] : -Infinity;
+        const fromLeft = j > 0 ? dp[i][j - 1] : -Infinity;
+        if (i === 0 && j === 0) {
+          dp[i][j] = w;
+        } else {
+          dp[i][j] = w + Math.max(fromTop, fromLeft);
+        }
+      }
+    }
+
+    // 回溯 geodesic 路径
+    let i = N - 1;
+    let j = N - 1;
+    const pathCells = new Set();
+    while (i >= 0 && j >= 0) {
+      pathCells.add(i + "," + j);
+      if (i === 0 && j === 0) break;
+
+      const fromTop = i > 0 ? dp[i - 1][j] : -Infinity;
+      const fromLeft = j > 0 ? dp[i][j - 1] : -Infinity;
+      if (fromTop >= fromLeft) {
+        i--;
+      } else {
+        j--;
+      }
+    }
+
+    // 生成 HTML 表格
+    let tableHtml = `<table class="lpp-grid">`;
+    for (let r = 0; r < N; r++) {
+      tableHtml += "<tr>";
+      for (let c = 0; c < N; c++) {
+        const key = r + "," + c;
+        const onPath = pathCells.has(key);
+        const cls = onPath ? "path-cell" : "weight-cell";
+        tableHtml += `<td class="${cls}">${weights[r][c].toFixed(1)}</td>`;
+      }
+      tableHtml += "</tr>";
+    }
+    tableHtml += "</table>";
+
+    const lastPassageValue = dp[N - 1][N - 1];
+
+    const outputEl = document.getElementById("lpp-output");
+    outputEl.innerHTML = `
+      <div class="lpp-info">
+        Grid size: ${N} × ${N}. Last passage time to (N,N): <strong>${lastPassageValue.toFixed(2)}</strong>.
+      </div>
+      ${tableHtml}
+      <div class="lpp-legend">
+        Green cells indicate one maximizing up-right path (geodesic) from (1,1) to (N,N) under the sampled weights.
+      </div>
+    `;
+  }
+
+  // ===== 初始化 =====
+  document.addEventListener("DOMContentLoaded", () => {
+    renderPaperMap();
+    if (papersData.length > 0) {
+      selectPaper(papersData[0].id);
+    }
+  });
+</script>
+</body>
+</html>
