@@ -402,12 +402,15 @@
   // x, y 是画布上的位置（百分比），方便你手动“排版”论文之间的大致关系。
   const papersData = [
     {
-      id: "BDJ1999",
-      title: "Baik–Deift–Johansson (1999) – Longest increasing subsequence & GUE Tracy–Widom",
-      year: 1999,
-      x: 20,
-      y: 30,
-      tags: ["LIS", "GUE", "Tracy–Widom", "early KPZ"],
+  id: "BDJ1999",
+  // 完整标题：给右侧详情用
+  title: "Longest increasing subsequence of random permutations and the Tracy–Widom distribution",
+  // 新增一个 label：专门给 canvas 上那颗点用
+  label: "Baik–Deift–Johansson (1999)",
+  year: 1999,
+  x: 20,
+  y: 30,
+  tags: ["LIS", "GUE", "Tracy–Widom", "early KPZ"],
       summaryHtml: `
         <p>
           One of the foundational works connecting combinatorics (longest increasing subsequences of random permutations)
@@ -598,13 +601,23 @@
       node.style.top = paper.y + "%";
       node.dataset.paperId = paper.id;
 
-      node.innerHTML = `
-        <span>${paper.title.split("–")[0].trim()}</span>
-        ${paper.tags && paper.tags.length
-          ? `<span class="node-tag">${paper.tags[0]}</span>`
-          : ""
-        }
-      `;
+      // 优先使用 paper.label；没有的话，就退回用 title
+const rawLabel = paper.label || paper.title;
+
+// 做一个保险：太长就截断，加省略号
+const maxLabelLength = 26;  // 你可以改成 20 / 24 看自己喜好
+const displayLabel =
+  rawLabel.length > maxLabelLength
+    ? rawLabel.slice(0, maxLabelLength - 1) + "…"
+    : rawLabel;
+
+node.innerHTML = `
+  <span>${displayLabel}</span>
+  ${paper.tags && paper.tags.length
+    ? `<span class="node-tag">${paper.tags[0]}</span>`
+    : ""
+  }
+`;
 
       node.addEventListener("click", () => selectPaper(paper.id));
       mapEl.appendChild(node);
