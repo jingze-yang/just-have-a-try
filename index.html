@@ -402,10 +402,50 @@
   // x, y 是画布上的位置（百分比），方便你手动“排版”论文之间的大致关系。
   const papersData = [
     {
-  id: "BDJ1999",
+  id: "KPZ1986",
   // 完整标题：给右侧详情用
-  title: "On the distribution of the length of the longest increasing subsequence of random permutations",
+  title: "Dynamic Scaling of Growing Interfaces",
   // 新增一个 label：专门给 canvas 上那颗点用
+  label:"Kardar-Parisi-Zhang(1986)",
+  year: "1986",
+  x: 25,
+  y: 10,
+  tags: ["kpz equation"],
+  summaryHtml: `xx`
+},
+{
+  id: "TW1994",
+  title: "Level-spacing distributions and the Airy kernel",
+  label:"Tracy-Widom(1994)",
+  year: "1994",
+  x: 75,
+  y: 10,
+  tags: ["TW-distribution", "integrable probability"],
+  summaryHtml: `xx`
+},
+{
+  id: "TW1996",
+  title: "On orthogonal and symplectic matrix ensembles",
+  label:"Tracy-Widom(1996)",
+  year: "1996",
+  x: 75,
+  y: 20,
+  tags: ["TW-distribution", "integrable probability"],
+  summaryHtml: `xx`
+},
+{
+  id: "BG1997",
+  title: "Stochastic Burgers and KPZ Equations from Particle Systems",
+  label:"Bertini-Giacomin(1997)",
+  year: "1997",
+  x: 25,
+  y: 20,
+  tags: ["kpz equation", "integrable probability"],
+  summaryHtml: `xx`
+},
+    {
+  id: "BDJ1999",
+  title: "On the distribution of the length of the longest increasing subsequence of random permutations",
   label: "Baik–Deift–Johansson (1999)",
   year: 1999,
   x: 50,
@@ -426,56 +466,25 @@
         </p>
       `
     },
-    {
-      id: "Jo2000",
-      title: "Shape Fluctuations and Random Matrices",
-      label:"Johansson(2000)",
-      year: 2000,
-      x: 50,
-      y: 35,
-      tags: ["LPP", "TASEP", "GUE", "Tracy-Widom","models","integrable probability"],
-      summaryHtml: `
-        <p>
-          Johansson's paper on last passage percolation with geometric / exponential weights, giving Tracy–Widom fluctuations and
-          identifying a KPZ-scaling regime for directed polymers / growth models.
-        </p>
-        <p>
-          <strong>Your note (placeholder):</strong> Add your understanding of LPP↔TASEP mapping here and how this paper
-          sets up the framework you are now extending in your own work.
-        </p>
-      `
-    },
-    {
-  id: "KPZ1986",
-  title: "Dynamic Scaling of Growing Interfaces",
-  label:"Kardar-Parisi-Zhang(1986)",
-  year: "1986",
-  x: 25,
-  y: 10,
-  tags: ["kpz equation"],
-  summaryHtml: `xx`
-},
 {
-  id: "BG1997",
-  title: "Stochastic Burgers and KPZ Equations from Particle Systems",
-  label:"Bertini-Giacomin(1997)",
-  year: "1997",
-  x: 25,
-  y: 20,
-  tags: ["kpz equation", "integrable probability"],
-  summaryHtml: `xx`
-},
-{
-  id: "ACQ2011",
-  title: "Probability distribution of the free energy of the continuum directed random polymer in 1+1 dimensions",
-  label:"Amir-Corwin-Quastel(2011)",
-  year: "2011",
-  x: 25,
-  y: 50,
-  tags: ["kpz equation", "integrable probability"],
-  summaryHtml: `xx`
-},
-
+    id: "Jo2000",
+    title: "Shape Fluctuations and Random Matrices",
+    label:"Johansson(2000)",
+    year: 2000,
+    x: 50,
+    y: 35,
+    tags: ["LPP", "TASEP", "GUE", "Tracy-Widom","models","integrable probability"],
+    summaryHtml: `
+      <p>
+        Johansson's paper on last passage percolation with geometric / exponential weights, giving Tracy–Widom fluctuations and
+        identifying a KPZ-scaling regime for directed polymers / growth models.
+      </p>
+      <p>
+        <strong>Your note (placeholder):</strong> Add your understanding of LPP↔TASEP mapping here and how this paper
+        sets up the framework you are now extending in your own work.
+      </p>
+    `
+  },
 {
   id: "TW2007",
   title: "Integral Formulas for the Asymmetric Simple Exclusion Process",
@@ -497,34 +506,23 @@
   summaryHtml: `xx`
 },
 {
+  id: "ACQ2011",
+  title: "Probability distribution of the free energy of the continuum directed random polymer in 1+1 dimensions",
+  label:"Amir-Corwin-Quastel(2011)",
+  year: "2011",
+  x: 25,
+  y: 50,
+  tags: ["kpz equation", "integrable probability"],
+  summaryHtml: `xx`
+},
+{
   id: "MQR2021",
   title: "The KPZ fixed point",
-  Label:"Matetski–Quastel–Remenik(2021)",
+  label:"Matetski–Quastel–Remenik(2021)",
   year: "2021",
   x: 50,
   y: 70,
   tags: ["models", "integrable probability"],
-  summaryHtml: `xx`
-},
-
-{
-  id: "TW1994",
-  title: "Level-spacing distributions and the Airy kernel",
-  label:"Tracy-Widom(1994)",
-  year: "1994",
-  x: 75,
-  y: 10,
-  tags: ["TW-distribution", "integrable probability"],
-  summaryHtml: `xx`
-},
-{
-  id: "TW1996",
-  title: "On orthogonal and symplectic matrix ensembles",
-  label:"Tracy-Widom(1996)",
-  year: "1996",
-  x: 75,
-  y: 20,
-  tags: ["TW-distribution", "integrable probability"],
   summaryHtml: `xx`
 },
     {
