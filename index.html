@@ -528,7 +528,7 @@
   summaryHtml: `This is a lecture note written by Professor Timo on the corner growth model. It starts from the ground up and presents the classical results for the LPP model with geometric and exponential weights:
 	1.	the limit shape
 \\( \\frac{1}{N} G(\\lfloor Nx \\rfloor, \\lfloor Ny \\rfloor)\\to \\Psi(x,y)\\qquad \\text{a.s.}, \\)
-together with an explicit formula for \Psi in the geometric-weight case;
+together with an explicit formula for \\(\\Psi\\) in the geometric-weight case;
 	2.	the one-to-one correspondences among TASEP, M/M/1 queues, and LPP;
 	3.	the definition of the Tracy–Widom distribution;
 	4.	the fluctuation result for geometric-weight LPP,
@@ -617,32 +617,38 @@ node.innerHTML = `
     });
   }
 
-  // ===== 3. 展示论文详情 =====
-  function selectPaper(paperId) {
-    const paper = papersData.find(p => p.id === paperId);
-    if (!paper) return;
+// ===== 3. 展示论文详情 =====
+function selectPaper(paperId) {
+  const paper = papersData.find(p => p.id === paperId);
+  if (!paper) return;
 
-    // 节点高亮
-    const allNodes = document.querySelectorAll(".paper-node");
-    allNodes.forEach(node => {
-      node.classList.toggle("active", node.dataset.paperId === paperId);
+  // 节点高亮
+  const allNodes = document.querySelectorAll(".paper-node");
+  allNodes.forEach(node => {
+    node.classList.toggle("active", node.dataset.paperId === paperId);
+  });
+
+  const detailEl = document.getElementById("paper-detail");
+  detailEl.innerHTML = `
+    <h3>${paper.title}</h3>
+    <div class="paper-meta">
+      <span>Year: ${paper.year}</span>
+    </div>
+    <div>
+      ${(paper.tags || []).map(tag => `<span class="tag-chip">${tag}</span>`).join("")}
+    </div>
+    <div class="paper-summary">
+      ${paper.summaryHtml}
+    </div>
+  `;
+
+  // ★ 关键：对新插入的内容重新运行 MathJax
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise([detailEl]).catch(function (err) {
+      console.error("MathJax typeset failed:", err);
     });
-
-    const detailEl = document.getElementById("paper-detail");
-    detailEl.innerHTML = `
-      <h3>${paper.title}</h3>
-      <div class="paper-meta">
-        <span>Year: ${paper.year}</span>
-      </div>
-      <div>
-        ${(paper.tags || []).map(tag => `<span class="tag-chip">${tag}</span>`).join("")}
-      </div>
-      <div class="paper-summary">
-        ${paper.summaryHtml}
-      </div>
-    `;
   }
-
+}
   // ===== 4. LPP 模拟 =====
   function runLPPSimulation() {
     const N = 10; // grid size
