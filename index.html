@@ -312,7 +312,50 @@
       margin-top: 0.35rem;
       color: #9ca3af;
     }
-
+    #tw-output {
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      max-height: 360px;
+      overflow: auto;
+    }
+    .tw-intro p {
+      margin: 0.25rem 0;
+      color: #9ca3af;
+    }
+    .tw-plot-wrapper {
+      margin-top: 0.5rem;
+      padding: 0.5rem 0.6rem 0.55rem;
+      border-radius: 0.6rem;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 60%);
+      border: 1px solid #1f2937;
+    }
+    .tw-plot-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .tw-axis {
+      stroke: #4b5563;
+      stroke-width: 0.8;
+    }
+    .tw-axis-label {
+      fill: #9ca3af;
+      font-size: 8px;
+      dominant-baseline: central;
+    }
+    .tw-curve {
+      fill: none;
+      stroke: #22c55e;
+      stroke-width: 1.6;
+    }
+    .tw-sample-point {
+      fill: #22c55e;
+    }
+    .tw-plot-caption {
+      margin-top: 0.35rem;
+      font-size: 0.7rem;
+      color: #9ca3af;
+    }
     /* ===== 页脚 ===== */
     footer {
       text-align: center;
@@ -400,6 +443,27 @@
         ▶ Run LPP simulation
       </button>
       <div id="lpp-output"></div>
+    </div>
+<div class="model-card">
+      <div class="model-header">
+        <h3>Tracy–Widom 分布的绘制</h3>
+        <span class="badge">
+          <span class="badge-dot"></span>
+          Fredholm det → TW F₂
+        </span>
+      </div>
+      <p>
+        在 GUE 情形下，最大特征值归一化后的极限分布是 Tracy–Widom \\(F_2\\)。这里用一个极简版本的 Bornemann (2010) 数值框架：用 Nyström 型求积近似
+        Fredholm 行列式 \\(F_2(s)=\\det(I-K_{\\mathrm{Ai}})_{L^2(s,\\infty)}\\)，离线生成若干采样点，在前端连成一条平滑的 CDF 曲线。
+      </p>
+      <p>
+        点击按钮会在下方画出 \\(F_2(s)\\) 的图像，并用简短文字回顾“Airy 核 → Fredholm 行列式 → Tracy–Widom 分布”的链条，帮助把 KPZ / 随机矩阵里的
+        抽象极限定理变成肉眼可见的曲线。
+      </p>
+      <button class="btn" onclick="runTWSimulation()">
+        ▶ Run Tracy–Widom F₂ plot
+      </button>
+      <div id="tw-output"></div>
     </div>
   </section>
 </main>
@@ -795,7 +859,180 @@ function selectPaper(paperId) {
       </div>
     `;
   }
+/* ===== 新增：Tracy–Widom 绘图相关函数 ===== */
 
+  function getTW2Samples() {
+    return [
+      { s: -8.0, F: 1.9859004257636574e-19 },
+      { s: -7.0, F: 2.639614767246062e-13 },
+      { s: -6.0, F: 1.062254674124451e-8 },
+      { s: -5.0, F: 2.135996984741116e-5 },
+      { s: -4.0, F: 0.0035445535955092003 },
+      { s: -3.0, F: 0.08031955293933454 },
+      { s: -2.0, F: 0.41322414250512257 },
+      { s: -1.0, F: 0.8072142419992853 },
+      { s: -0.1, F: 0.9620142937272265 },
+      { s: 0.1, F: 0.9754704606594619 },
+      { s: 1.0, F: 0.9975054381493893 },
+      { s: 2.0, F: 0.9998875536983092 },
+      { s: 3.0, F: 0.9999970059566077 },
+      { s: 4.0, F: 0.9999999504208784 },
+      { s: 5.0, F: 0.9999999994682207 },
+      { s: 6.0, F: 0.9999999999961827 },
+      { s: 7.0, F: 0.9999999999999811 },
+      { s: 8.0, F: 0.9999999999999999 }
+    ];
+  }
+
+  function runTWSimulation() {
+    const outputEl = document.getElementById("tw-output");
+    if (!outputEl) return;
+
+    outputEl.innerHTML = "";
+
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "tw-intro";
+    infoDiv.innerHTML = `
+      <p>在这个模型里，我们可视化 GUE Tracy–Widom 分布 \$begin:math:text$F\_2\(s\)\\$end:math:text$。数值采用 Bornemann (2010) 提出的 Fredholm 行列式 + Nyström 离散化方法预先计算的一组采样点。</p>
+      <p>理论上，\$begin:math:text$F\_2\(s\) \= \\\\det\\\\bigl\(I \- K\_\{\\\\mathrm\{Ai\}\}\\\\bigr\)\_\{L\^2\(s\,\\\\infty\)\}\\$end:math:text$ 是 Airy 核 \$begin:math:text$K\_\{\\\\mathrm\{Ai\}\}\\$end:math:text$ 在半轴上的 Fredholm 行列式；在前端中，我们只在若干 \$begin:math:text$s\\$end:math:text$ 上取样并将它们连成一条近似的 CDF 曲线。</p>
+    `;
+    outputEl.appendChild(infoDiv);
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "tw-plot-wrapper";
+
+    const svgWidth = 360;
+    const svgHeight = 220;
+    const paddingLeft = 40;
+    const paddingRight = 16;
+    const paddingTop = 16;
+    const paddingBottom = 32;
+
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", svgWidth);
+    svg.setAttribute("height", svgHeight);
+    svg.setAttribute("viewBox", "0 0 " + svgWidth + " " + svgHeight);
+    svg.classList.add("tw-plot-svg");
+
+    const samples = getTW2Samples();
+    const sValues = samples.map(function (p) { return p.s; });
+
+    const sMin = Math.min.apply(null, sValues);
+    const sMax = Math.max.apply(null, sValues);
+    const FMin = 0.0;
+    const FMax = 1.0;
+
+    function xScale(s) {
+      const innerWidth = svgWidth - paddingLeft - paddingRight;
+      return paddingLeft + (s - sMin) / (sMax - sMin) * innerWidth;
+    }
+
+    function yScale(F) {
+      const innerHeight = svgHeight - paddingTop - paddingBottom;
+      return svgHeight - paddingBottom - (F - FMin) / (FMax - FMin) * innerHeight;
+    }
+
+    const x0 = xScale(sMin);
+
+    const axisX = document.createElementNS(svgNS, "line");
+    axisX.setAttribute("x1", x0);
+    axisX.setAttribute("y1", yScale(0));
+    axisX.setAttribute("x2", xScale(sMax));
+    axisX.setAttribute("y2", yScale(0));
+    axisX.setAttribute("class", "tw-axis");
+    svg.appendChild(axisX);
+
+    const axisY = document.createElementNS(svgNS, "line");
+    axisY.setAttribute("x1", x0);
+    axisY.setAttribute("y1", yScale(FMin));
+    axisY.setAttribute("x2", x0);
+    axisY.setAttribute("y2", yScale(FMax));
+    axisY.setAttribute("class", "tw-axis");
+    svg.appendChild(axisY);
+
+    const sTicks = [-8, -4, 0, 4, 8];
+    sTicks.forEach(function (tick) {
+      if (tick < sMin || tick > sMax) return;
+      const x = xScale(tick);
+      const y0 = yScale(0);
+      const tickLine = document.createElementNS(svgNS, "line");
+      tickLine.setAttribute("x1", x);
+      tickLine.setAttribute("y1", y0 - 3);
+      tickLine.setAttribute("x2", x);
+      tickLine.setAttribute("y2", y0 + 3);
+      tickLine.setAttribute("class", "tw-axis");
+      svg.appendChild(tickLine);
+
+      const label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", x);
+      label.setAttribute("y", svgHeight - 6);
+      label.setAttribute("class", "tw-axis-label");
+      label.setAttribute("text-anchor", "middle");
+      label.textContent = tick;
+      svg.appendChild(label);
+    });
+
+    const fTicks = [0, 0.5, 1];
+    fTicks.forEach(function (tick) {
+      const y = yScale(tick);
+      const tickLine = document.createElementNS(svgNS, "line");
+      tickLine.setAttribute("x1", x0 - 3);
+      tickLine.setAttribute("y1", y);
+      tickLine.setAttribute("x2", x0 + 3);
+      tickLine.setAttribute("y2", y);
+      tickLine.setAttribute("class", "tw-axis");
+      svg.appendChild(tickLine);
+
+      const label = document.createElementNS(svgNS, "text");
+      label.setAttribute("x", 8);
+      label.setAttribute("y", y + 3);
+      label.setAttribute("class", "tw-axis-label");
+      label.textContent = tick.toFixed(1);
+      svg.appendChild(label);
+    });
+
+    let pathData = "";
+    samples.forEach(function (p, index) {
+      const x = xScale(p.s);
+      const y = yScale(p.F);
+      if (index === 0) {
+        pathData += "M " + x + " " + y;
+      } else {
+        pathData += " L " + x + " " + y;
+      }
+    });
+    const curve = document.createElementNS(svgNS, "path");
+    curve.setAttribute("d", pathData);
+    curve.setAttribute("class", "tw-curve");
+    svg.appendChild(curve);
+
+    samples.forEach(function (p) {
+      const x = xScale(p.s);
+      const y = yScale(p.F);
+      const circle = document.createElementNS(svgNS, "circle");
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.setAttribute("r", 2);
+      circle.setAttribute("class", "tw-sample-point");
+      svg.appendChild(circle);
+    });
+
+    wrapper.appendChild(svg);
+
+    const caption = document.createElement("div");
+    caption.className = "tw-plot-caption";
+    caption.innerHTML = "绿色曲线是 GUE Tracy–Widom CDF \\(F_2(s)\\) 的近似图像：左尾极瘦、右侧快速趋近于 1，是 KPZ / 随机矩阵中最常出现的极限分布之一。";
+    wrapper.appendChild(caption);
+
+    outputEl.appendChild(wrapper);
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+      MathJax.typesetPromise([outputEl]).catch(function (err) {
+        console.error("MathJax typeset failed:", err);
+      });
+    }
+  }
   // ===== 初始化 =====
   document.addEventListener("DOMContentLoaded", () => {
     renderPaperMap();
