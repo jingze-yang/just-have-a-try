@@ -445,26 +445,29 @@
       <div id="lpp-output"></div>
     </div>
 <div class="model-card">
-      <div class="model-header">
-        <h3>Tracy–Widom 分布的绘制</h3>
-        <span class="badge">
-          <span class="badge-dot"></span>
-          Fredholm det → TW F₂
-        </span>
-      </div>
-      <p>
-        在 GUE 情形下，最大特征值归一化后的极限分布是 Tracy–Widom \\(F_2\\)。这里用一个极简版本的 Bornemann (2010) 数值框架：用 Nyström 型求积近似
-        Fredholm 行列式 \\(F_2(s)=\\det(I-K_{\\mathrm{Ai}})_{L^2(s,\\infty)}\\)，离线生成若干采样点，在前端连成一条平滑的 CDF 曲线。
-      </p>
-      <p>
-        点击按钮会在下方画出 \\(F_2(s)\\) 的图像，并用简短文字回顾“Airy 核 → Fredholm 行列式 → Tracy–Widom 分布”的链条，帮助把 KPZ / 随机矩阵里的
-        抽象极限定理变成肉眼可见的曲线。
-      </p>
-      <button class="btn" onclick="runTWSimulation()">
-        ▶ Run Tracy–Widom F₂ plot
-      </button>
-      <div id="tw-output"></div>
-    </div>
+  <div class="model-header">
+    <h3>Plotting the Tracy–Widom distribution</h3>
+    <span class="badge">
+      <span class="badge-dot"></span>
+      Fredholm det → TW F₂
+    </span>
+  </div>
+  <p>
+    Under GUE edge scaling, the limiting law of the top eigenvalue is the Tracy–Widom distribution \(F_2\).
+    Here we use a very light version of Bornemann (2010): conceptually we approximate the Fredholm determinant
+    \(F_2(s)=\det(I-K_{\mathrm{Ai}})_{L^2(s,\infty)}\) via a Nyström-type quadrature, then keep a handful of sample points
+    and connect them into a smooth CDF curve in the browser.
+  </p>
+  <p>
+    Click the button to plot \(F_2(s)\) below and recall the chain
+    “Airy kernel → Fredholm determinant → Tracy–Widom law”, turning the abstract KPZ / random-matrix limit theorem
+    into a visible curve.
+  </p>
+  <button class="btn" onclick="runTWSimulation()">
+    ▶ Run Tracy–Widom F₂ plot
+  </button>
+  <div id="tw-output"></div>
+</div>
   </section>
 </main>
 
@@ -891,10 +894,13 @@ function selectPaper(paperId) {
     outputEl.innerHTML = "";
 
     const infoDiv = document.createElement("div");
-    infoDiv.className = "tw-intro";
-    infoDiv.innerHTML = `
-      <p>在这个模型里，我们可视化 GUE Tracy–Widom 分布 \$begin:math:text$F\_2\(s\)\\$end:math:text$。数值采用 Bornemann (2010) 提出的 Fredholm 行列式 + Nyström 离散化方法预先计算的一组采样点。</p>
-      <p>理论上，\$begin:math:text$F\_2\(s\) \= \\\\det\\\\bigl\(I \- K\_\{\\\\mathrm\{Ai\}\}\\\\bigr\)\_\{L\^2\(s\,\\\\infty\)\}\\$end:math:text$ 是 Airy 核 \$begin:math:text$K\_\{\\\\mathrm\{Ai\}\}\\$end:math:text$ 在半轴上的 Fredholm 行列式；在前端中，我们只在若干 \$begin:math:text$s\\$end:math:text$ 上取样并将它们连成一条近似的 CDF 曲线。</p>
+  infoDiv.className = "tw-intro";
+  infoDiv.innerHTML = `
+      <p>In this toy model we visualize the GUE Tracy–Widom distribution \\(F_2(s)\\). The sample values were
+      precomputed using the Fredholm determinant + Nystr&ouml;m discretization method of Bornemann (2010).</p>
+      <p>Theoretically, \$begin:math:text$F\_2\(s\) \= \\\\det\\\\bigl\(I \- K\_\{\\\\mathrm\{Ai\}\}\\\\bigr\)\_\{L\^2\(s\,\\\\infty\)\}\\$end:math:text$ is the Fredholm determinant
+      of the Airy kernel \$begin:math:text$K\_\{\\\\mathrm\{Ai\}\}\\$end:math:text$ on the half-line. On the front-end we only keep a small set of
+      \$begin:math:text$s\\$end:math:text$-values and connect them into an approximate CDF curve.</p>
     `;
     outputEl.appendChild(infoDiv);
 
@@ -1021,9 +1027,9 @@ function selectPaper(paperId) {
     wrapper.appendChild(svg);
 
     const caption = document.createElement("div");
-    caption.className = "tw-plot-caption";
-    caption.innerHTML = "绿色曲线是 GUE Tracy–Widom CDF \\(F_2(s)\\) 的近似图像：左尾极瘦、右侧快速趋近于 1，是 KPZ / 随机矩阵中最常出现的极限分布之一。";
-    wrapper.appendChild(caption);
+  caption.className = "tw-plot-caption";
+  caption.innerHTML = "The green curve is an approximate CDF of the GUE Tracy–Widom law \\(F_2(s)\\): an extremely thin left tail and a very fast approach to 1 on the right, one of the most ubiquitous limit distributions in KPZ / random matrix theory.";
+  wrapper.appendChild(caption);
 
     outputEl.appendChild(wrapper);
 
