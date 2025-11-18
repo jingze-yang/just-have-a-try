@@ -894,14 +894,19 @@ function selectPaper(paperId) {
     outputEl.innerHTML = "";
 
     const infoDiv = document.createElement("div");
-  infoDiv.className = "tw-intro";
-  infoDiv.innerHTML = `
-      <p>In this toy model we visualize the GUE Tracy–Widom distribution \\(F_2(s)\\). The sample values were
-      precomputed using the Fredholm determinant + Nystr&ouml;m discretization method of Bornemann (2010).</p>
-      <p>Theoretically, \$begin:math:text$F\_2\(s\) \= \\\\det\\\\bigl\(I \- K\_\{\\\\mathrm\{Ai\}\}\\\\bigr\)\_\{L\^2\(s\,\\\\infty\)\}\\$end:math:text$ is the Fredholm determinant
-      of the Airy kernel \$begin:math:text$K\_\{\\\\mathrm\{Ai\}\}\\$end:math:text$ on the half-line. On the front-end we only keep a small set of
-      \$begin:math:text$s\\$end:math:text$-values and connect them into an approximate CDF curve.</p>
-    `;
+infoDiv.className = "tw-intro";
+infoDiv.innerHTML = `
+  <p>
+    In this toy model we visualize the GUE Tracy–Widom distribution
+    <em>F</em><sub>2</sub>(s). The sample values were precomputed using
+    the Fredholm determinant + Nystr&ouml;m discretization method of Bornemann (2010).
+  </p>
+  <p>
+    Theoretically, this law can be written as a Fredholm determinant of the Airy kernel
+    on the half-line. On the front-end we only keep a small discrete set of s-values and
+    connect them into an approximate CDF curve.
+  </p>
+`;
     outputEl.appendChild(infoDiv);
 
     const wrapper = document.createElement("div");
@@ -1027,9 +1032,10 @@ function selectPaper(paperId) {
     wrapper.appendChild(svg);
 
     const caption = document.createElement("div");
-  caption.className = "tw-plot-caption";
-  caption.innerHTML = "The green curve is an approximate CDF of the GUE Tracy–Widom law \\(F_2(s)\\): an extremely thin left tail and a very fast approach to 1 on the right, one of the most ubiquitous limit distributions in KPZ / random matrix theory.";
-  wrapper.appendChild(caption);
+caption.className = "tw-plot-caption";
+caption.innerHTML =
+  "The green curve is an approximate CDF of the GUE Tracy–Widom law F\u2082(s): an extremely thin left tail and a very fast approach to 1 on the right, one of the most ubiquitous limit distributions in KPZ / random matrix theory.";
+wrapper.appendChild(caption);
 
     outputEl.appendChild(wrapper);
 
